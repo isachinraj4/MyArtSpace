@@ -17,8 +17,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.myartspace.ui.theme.MyArtSpaceTheme
+import com.example.myartspace.data.ArtSpaceDatasource
+import com.example.myartspace.model.arts
 
+import com.example.myartspace.ui.theme.MyArtSpaceTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    ShowDetails()
+                    ArtSpaceApp()
                 }
             }
         }
@@ -38,40 +40,29 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun ShowDetails(){
-    var nextImageID by remember{ mutableStateOf(1) }
+fun ArtSpaceApp(){
+    var clicks by remember { mutableStateOf(0) }
 
-    when(nextImageID) {
-        1 -> {
-            DisplayArt(iMageID = R.drawable.fish, onNextClick = {
-                nextImageID = 2
-            })
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colors.background
+    ) {
+        if(clicks >= arts.size) {
+            clicks = 0
         }
-        2 -> {
-            DisplayArt(iMageID = R.drawable.drawing, onNextClick = {
-                nextImageID = 3
-            })
+        else if (clicks < 0 ) {
+            clicks = arts.size - 1
         }
-        3 -> {
-            DisplayArt(iMageID = R.drawable.drwimag, onNextClick = {
-                nextImageID = 4
-            })
-        }
-        4 -> {
-            DisplayArt(iMageID = R.drawable.night, onNextClick = {
-              nextImageID = 1;
-            })
-        }
+        ArtSpaceWithImage(arts[clicks].imageResourceId, arts[clicks].aboutImage,{clicks += 1}, {clicks -= 1})
     }
-
 }
 
-
 @Composable
-fun DisplayArt(
-    iMageID: Int,
-    onNextClick: () -> Unit
-) {
+fun ArtSpaceWithImage(iMageID: Int,
+                      iMageAbt: String,
+                      onNextClick: () -> Unit,
+                      onPrevClick: () -> Unit,
+                      modifier: Modifier = Modifier){
     Column(
         modifier = Modifier
             .wrapContentSize()
@@ -105,7 +96,7 @@ fun DisplayArt(
         ) {
             Text(text = "About")
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Year")
+            Text(text = iMageAbt)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -117,7 +108,7 @@ fun DisplayArt(
             horizontalArrangement = Arrangement.Center
         ) {
             Button(
-                onClick = { onNextClick },
+                onClick = onPrevClick,
                 modifier = Modifier
                     .wrapContentHeight()
                     .width(120.dp)
@@ -128,7 +119,7 @@ fun DisplayArt(
             }
             Spacer(modifier = Modifier.width(48.dp))
             Button(
-                onClick = { onNextClick },
+                onClick =  onNextClick ,
                 modifier = Modifier
                     .wrapContentHeight()
                     .width(120.dp)
@@ -138,12 +129,14 @@ fun DisplayArt(
             }
         }
     }
+
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview
 @Composable
-fun DefaultPreview() {
-    MyArtSpaceTheme {
-        ShowDetails()
+fun ArtAppPreview(){
+    MyArtSpaceTheme{
+        ArtSpaceApp()
     }
 }
+
